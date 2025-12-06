@@ -1,0 +1,11 @@
+comet :
+  project_name : "generative AI"
+  api_key : ""
+
+dataset :
+  name : fashion #or fashion
+
+train:
+    dm :
+        lr: 1e-3
+        epochs : 150
