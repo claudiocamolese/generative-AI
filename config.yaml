@@ -3,7 +3,7 @@ comet :
   api_key : ""
 
 dataset :
-  name : fashion #or fashion
+  name : mnist #or fashion
 
 train:
     dm :

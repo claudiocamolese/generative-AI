@@ -7,26 +7,26 @@ import numpy as np
 
 class Visualizer:
     """
-    Utility class for visualizing the outputs of diffusion models.
+        Utility class for visualizing the outputs of diffusion models.
 
-    It provides two visualization modes:
-    - visualize_classes(): generate samples for all 10 MNIST classes
-    - visualize_steps(): generate samples for a fixed class varying the number of diffusion steps
+        It provides two visualization modes:
+        - visualize_classes(): generate samples for all 10 MNIST classes
+        - visualize_steps(): generate samples for a fixed class varying the number of diffusion steps
 
-    Images are automatically saved under:
-    - figures/diffusion/stable/
-    - figures/diffusion/steps/
+        Images are automatically saved under:
+        - figures/diffusion/stable/
+        - figures/diffusion/steps/
     """
 
     def __init__(self, sampler, marginal_fn, diffusion_coeff_fn, config, device="cuda" if torch.cuda.is_available() else 'cpu'):
         """
-        Initialize the Visualizer.
+            Initialize the Visualizer.
 
-        Args:
-            sampler: Sampling function (e.g., Euler-Maruyama, ODE, PC sampler)
-            marginal_fn: Function returning marginal probability std
-            diffusion_coeff_fn: Diffusion coefficient function
-            device: Computation device ("cuda" or "cpu")
+            Args:
+                sampler: Sampling function (e.g., Euler-Maruyama, ODE, PC sampler)
+                marginal_fn: Function returning marginal probability std
+                diffusion_coeff_fn: Diffusion coefficient function
+                device: Computation device ("cuda" or "cpu")
         """
 
         self.sampler = sampler
@@ -43,15 +43,15 @@ class Visualizer:
 
     def visualize_classes(self, model, sample_batch_size=16, num_steps=250):
         """
-        Generate samples for digits 0-9 with a fixed number of sampling steps.
+            Generate samples for digits 0-9 with a fixed number of sampling steps.
 
-        Args:
-            model: Trained diffusion model (score model)
-            sample_batch_size: Number of samples per class
-            num_steps: Number of denoising steps
+            Args:
+                model: Trained diffusion model (score model)
+                sample_batch_size: Number of samples per class
+                num_steps: Number of denoising steps
 
-        Saves:
-            figures/diffusion/stable/classes_{num_steps}steps.png
+            Saves:
+                figures/diffusion/stable/classes_{num_steps}steps.png
         """
 
         model.eval()
@@ -87,17 +87,17 @@ class Visualizer:
 
     def visualize_steps(self, model, digit=4, sample_batch_size=16, num_steps_list=None):
         """
-        Generate samples for a fixed digit while varying the number of diffusion steps.
+            Generate samples for a fixed digit while varying the number of diffusion steps.
 
-        Args:
-            model: Trained diffusion model
-            digit: Digit to condition on (0-9)
-            sample_batch_size: Number of samples per setting
-            num_steps_list: List of step counts to test. Defaults to:
-                            [10, 50, 100, 200, 500, 1000]
+            Args:
+                model: Trained diffusion model
+                digit: Digit to condition on (0-9)
+                sample_batch_size: Number of samples per setting
+                num_steps_list: List of step counts to test. Defaults to:
+                                [10, 50, 100, 200, 500, 1000]
 
-        Saves:
-            figures/diffusion/steps/digit{digit}_steps.png
+            Saves:
+                figures/diffusion/steps/digit{digit}_steps.png
         """
 
         if num_steps_list is None:

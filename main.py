@@ -6,12 +6,11 @@ import sys
 import os
 import yaml
 
-from torch.utils.data import DataLoader
 from train import Trainer
 from test import Tester
 from plotting import PlotModel
 
-from dataset import Dataset
+from dataset import MyDataloader
 from models.diffusion.diffusion import DiffusionModel
 from models.diffusion.utils.probability import marginal_prob_std, diffusion_coeff
 from models.diffusion.utils.visualizer import Visualizer
@@ -44,12 +43,8 @@ def main(args):
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    dataset = Dataset(dataset_name=config_file['dataset']['name'])
-    train_dataset, val_dataset, test_dataset = dataset.get_datasets()
-
-    train_loader = DataLoader(train_dataset, batch_size= 64, shuffle=True)
-    val_loader   = DataLoader(val_dataset, batch_size= 64, shuffle=False)
-    test_loader  = DataLoader(test_dataset, batch_size= 64, shuffle=False)
+    dataloader = MyDataloader(dataset_name=config_file['dataset']['name'])
+    train_loader, val_loader, test_loader = dataloader.get_dataloader()
 
     os.makedirs(f"models/diffusion/checkpoints/{config_file['dataset']['name']}/", exist_ok=True)
 
@@ -91,7 +86,7 @@ def main(args):
             model = tester.test_diffusion(model= diffusion_model, path= path)
 
             visualizer = Visualizer(
-                sampler= diffusion_model.sampling_technique,  # usa il metodo della classe
+                sampler= diffusion_model.sampling_technique,
                 marginal_fn= diffusion_model.marginal_prob_std,
                 diffusion_coeff_fn= diffusion_coeff,
                 device= device,
