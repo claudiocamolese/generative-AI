@@ -30,7 +30,7 @@ class Tester():
             self.img_batch = img_batch.to(self.device)
             self.label_batch = label_batch.to(self.device)
 
-            loss = loss_diffusion(model= self.model, img_batch=img_batch, label_batch=label_batch, marginal_prob_std= marginal_prob_std)
+            loss = loss_diffusion(model= self.model, img_batch= self.img_batch, label_batch= self.label_batch, marginal_prob_std= marginal_prob_std)
 
             batch_bar.set_description(f"Test Loss: {loss.item():.4f}")
 

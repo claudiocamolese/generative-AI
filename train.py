@@ -76,7 +76,7 @@ class Trainer():
             lr_current = scheduler.get_last_lr()[0]
 
             epoch_loss = avg_loss / num_items
-            print('{} Average Loss: {:5f} lr {:.1e}'.format(epoch, epoch_loss, lr_current))
+            print('{} Average Loss: {:5f} lr {:.1e}'.format(epoch + 1, epoch_loss, lr_current))
             
             if self.track_flag:
                 self.experiment.log_metric("epoch_loss", epoch_loss, step=epoch)

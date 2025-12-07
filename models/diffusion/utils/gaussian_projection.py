@@ -8,11 +8,11 @@ class GaussianFourierProjection(nn.Module):
         It is used to make the model understand the temporal step t in a feature vector.
         It is the same idea of positional encoding in `Attention is all you need` paper.
     """
-    def __init__(self, embed_dim, scale=30.):
+    def __init__(self, embed_dim, scale= 30.):
         """
-        Args:
-            embed_dim: final dimension of the embedding wanted
-            scale (optional): random scale to initialize projection weights
+            Args:
+                embed_dim: final dimension of the embedding wanted
+                scale (optional): random scale to initialize projection weights
         """
         super().__init__()
         
@@ -23,11 +23,11 @@ class GaussianFourierProjection(nn.Module):
         """Transforms a scalar diffusion time t ∈ [0,1] into a high dimenional embedding using
             sinusoidal functions to make patterns. 
 
-        Args:
-            t (float) : scalar diffusion time of shape (B,)
+            Args:
+                t (float) : scalar diffusion time of shape (B,)
 
-        Returns:
-            torch.tensor : high dimensional embedding time of shape (B, embed_dim) 
+            Returns:
+                torch.tensor : high dimensional embedding time of shape (B, embed_dim) 
         """
 
         # add a dimension to the time -> (B,1) and to W (1, embedd_dim//2) ---> (B, D)

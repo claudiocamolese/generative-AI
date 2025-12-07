@@ -85,7 +85,7 @@ class Visualizer:
 
     # ----------------------------------------------------------------------
 
-    def visualize_steps(self, model, digit=4, sample_batch_size=16, num_steps_list=None):
+    def visualize_steps(self, model, digit= 4, sample_batch_size= 16, num_steps_list= None):
         """
             Generate samples for a fixed digit while varying the number of diffusion steps.
 

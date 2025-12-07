@@ -64,6 +64,6 @@ class CrossAttention(nn.Module):
             Q, K, V = self.query(tokens), self.key(context), self.value(context)
         
         attention_scores = torch.einsum('bth,bsh->bts', Q, K)
-        attention_mats = F.softmax(attention_scores, dim= -1) # dovrebbe essere -1, prima era 1
+        attention_mats = F.softmax(attention_scores, dim= -1) 
         context_vector = torch.einsum("bts,bsh->bth", attention_mats, V)
         return context_vector

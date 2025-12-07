@@ -65,7 +65,7 @@ def main(args):
 
             model = DiffusionModel(marginal_prob_std= marginal_prob_std)
             
-            plotter = PlotModel(model= model)
+            plotter = PlotModel(model= model, device = device)
             plotter.plot_model(input= plotter.input_diffusion(), path="./figures/diffusion/model/")
 
             trainer.train_diffusion_model(model= model, epochs= epochs, lr= lr)

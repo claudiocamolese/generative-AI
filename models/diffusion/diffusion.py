@@ -67,7 +67,7 @@ class DiffusionModel(nn.Module):
         """------------------------
             ENCODING BLOCK
         ------------------------"""
-        self.conv1 = nn.Conv2d(1, channels[0], 3, stride= 1, bias=False)
+        self.conv1 = nn.Conv2d(1, channels[0], 3, stride= 1, bias= False)
         self.dense1 = FullyConnected(embed_dim, channels[0])
         self.gnorm1 = nn.GroupNorm(4, num_channels=channels[0])
 

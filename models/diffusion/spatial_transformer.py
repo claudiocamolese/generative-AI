@@ -22,7 +22,7 @@ class SpatialTransformer(nn.Module):
                 - self.transformer: Transformer block that handles self- and cross-attention
                                     and a feed-forward network (FFN) on flattened spatial tokens.
         """
-        super(SpatialTransformer, self).__init__()
+        super().__init__()
         self.transformer = Transformer(hidden_dim, context_dim)
 
     def forward(self, x, context= None):
