@@ -3,7 +3,7 @@ comet :
   api_key : ""
 
 dataset :
-  name : cifar10 #or fashion
+  name : fashion #or fashion
 
 train:
     dm :

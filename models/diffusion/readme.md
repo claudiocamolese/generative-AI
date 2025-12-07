@@ -132,7 +132,7 @@ cd generative-AI
 ```
 ```python
 # in the command line run
-python main.py --train --test --dm # you can just use train/test flag
+python main.py --train --test --dm <optional>--track# you can just use train/test flag
 ```
 
 ### Model architecture image

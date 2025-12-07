@@ -17,7 +17,7 @@ def loss_diffusion(model, img_batch, label_batch, marginal_prob_std,eps=1e-5, de
         torch.Tensor: The computed loss as a scalar tensor.
     """
     
-    # Sample a random time step for each sample in the batch.
+    # Sample a random time step for each sample in the batch. t ∈ [eps, 1]
     random_t = torch.rand(img_batch.shape[0], device= device) * (1. - eps) + eps
     
     # Sample random noise from a standard normal distribution with the same shape as the input.

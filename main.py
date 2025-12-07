@@ -24,16 +24,26 @@ def parse_args(args=sys.argv[1:]):
                         help="training mode")
     parser.add_argument("--test", action="store_true",
                         help="testing mode")
-    parser.add_argument("--gan", action="store_true",
-                        help="use GAN during training")
-    parser.add_argument("--dm", action= "store_true",
-                        help="use Diffusion models during training")
     parser.add_argument("--track", action="store_true",
                         help="Track the training of the model")
-    return parser.parse_args(args)
+    
+    group = parser.add_mutually_exclusive_group(required=True)
+
+    group.add_argument("--dm", action="store_true", help="Run diffusion model")
+    group.add_argument("--gan", action="store_true", help="Run GAN model")
+    group.add_argument("--fb", action="store_true", help="Run flow-based model")
+    group.add_argument("--vae", action="store_true", help="Run variational autoencoder model")
+
+    args = parser.parse_args(args)
+
+    if not (args.train or args.test):
+        parser.error("You must specify at least --train or --test")
+
+    return args
+
 
 def main(args):
-
+    
     with open('config.yaml', 'r') as file:
         config_file = yaml.safe_load(file) 
 

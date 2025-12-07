@@ -59,25 +59,25 @@ class Visualizer:
 
         for i, digit in enumerate(range(10)):
 
-            y = digit * torch.ones(sample_batch_size, dtype=torch.long).to(self.device)
+            y = digit * torch.ones(sample_batch_size, dtype= torch.long).to(self.device)
 
             samples = self.sampler(
-                num_steps=num_steps,
-                batch_size=sample_batch_size,
-                device=self.device,
-                y=y
+                num_steps= num_steps,
+                batch_size= sample_batch_size,
+                device= self.device,
+                y= y
             )
 
             samples = samples.clamp(0.0, 1.0)
             sample_grid = make_grid(samples, nrow=int(np.sqrt(sample_batch_size)))
 
             plt.subplot(2, 5, i + 1)
-            plt.title(f"Digit: {digit}")
+            plt.title(f"Class: {digit}")
             plt.axis("off")
-            plt.imshow(sample_grid.permute(1, 2, 0).cpu(), vmin=0., vmax=1.)
+            plt.imshow(sample_grid.permute(1, 2, 0).cpu(), vmin= 0., vmax= 1.)
 
         plt.tight_layout()
-        path = f"./figures/diffusion/{self.config['dataset']['name']}/stable/classes_{num_steps}steps.png"
+        path = f"./figures/diffusion/{self.config['dataset']['name']}/stable/classes_{num_steps}_steps.png"
         plt.savefig(path, dpi=300)
         plt.close()
 
@@ -97,7 +97,7 @@ class Visualizer:
                                 [10, 50, 100, 200, 500, 1000]
 
             Saves:
-                figures/diffusion/steps/digit{digit}_steps.png
+                figures/diffusion/steps/digit_{digit}_steps.png
         """
 
         if num_steps_list is None:
@@ -111,23 +111,22 @@ class Visualizer:
         for i, num_steps in enumerate(num_steps_list):
 
             samples = self.sampler(
-                num_steps=num_steps,
-                batch_size=sample_batch_size,
-                device=self.device,
-                y=y
-            )
+                num_steps= num_steps,
+                batch_size= sample_batch_size,
+                device= self.device,
+                y=y)
 
             samples = samples.clamp(0.0, 1.0)
-            sample_grid = make_grid(samples, nrow=int(np.sqrt(sample_batch_size)))
+            sample_grid = make_grid(samples, nrow= int(np.sqrt(sample_batch_size)))
 
             plt.subplot(1, len(num_steps_list), i + 1)
             plt.title(f"Steps: {num_steps}")
             plt.axis("off")
-            plt.imshow(sample_grid.permute(1, 2, 0).cpu(), vmin=0., vmax=1.)
+            plt.imshow(sample_grid.permute(1, 2, 0).cpu(), vmin= 0., vmax= 1.)
 
         plt.tight_layout()
-        path = f"./figures/diffusion/{self.config['dataset']['name']}/steps/digit{digit}_steps.png"
-        plt.savefig(path, dpi=300)
+        path = f"./figures/diffusion/{self.config['dataset']['name']}/steps/class_{digit}_steps.png"
+        plt.savefig(path, dpi= 300)
         plt.close()
 
         print(f"Saved figure to: {path}")

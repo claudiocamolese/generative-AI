@@ -157,7 +157,7 @@ class DiffusionModel(nn.Module):
         d = self.gelu(self.tgnorm2(self.tconv2(d + l2) + self.dense7(t_embed)))
         d = self.tconv1(d + l1)
 
-        # Normalize predicted noise by marginal std at time t
+        # Normalize predicted noise by marginal std at time t. This is the score function in the paper.
         return d / self.marginal_prob_std(t)[:, None, None, None]
 
     @torch.no_grad()
