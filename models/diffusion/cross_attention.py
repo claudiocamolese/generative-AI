@@ -18,7 +18,7 @@ class CrossAttention(nn.Module):
             Q (batch_size, seq_len, hidden_dim) and (K / V) (batch_size, seq_len_context, context_dim)
     """
 
-    def __init__(self, embed_dim, hidden_dim, context_dim=None):
+    def __init__(self, embed_dim, hidden_dim, context_dim= None):
         """
         Args:
             embed_dim: dimension of the input token
@@ -26,20 +26,29 @@ class CrossAttention(nn.Module):
             context_dim (optional): context dimension. If it is None -> self-attention
         """
         super().__init__()
+        
         self.hidden_dim = hidden_dim
         self.context_dim = context_dim
         self.embed_dim = embed_dim
-        self.query = nn.Linear(hidden_dim, embed_dim, bias=False)
-        if context_dim is None:
-            self.self_attn = True
-            self.key = nn.Linear(hidden_dim, embed_dim, bias=False)
-            self.value = nn.Linear(hidden_dim, hidden_dim, bias=False)
-        else:
-            self.self_attn = False
-            self.key = nn.Linear(context_dim, embed_dim, bias=False)
-            self.value = nn.Linear(context_dim, hidden_dim, bias=False)
+        self.query = nn.Linear(hidden_dim, embed_dim, bias= False)
 
-    def forward(self, tokens, context=None):
+        if context_dim is None:
+            """---------------------- 
+                SELF-ATTENTION
+            ----------------------"""
+            self.self_attention = True
+            self.key = nn.Linear(hidden_dim, embed_dim, bias= False)
+            self.value = nn.Linear(hidden_dim, hidden_dim, bias= False)
+
+        else:
+            """---------------------- 
+                CROSS-ATTENTION
+            ----------------------"""
+            self.self_attention = False
+            self.key = nn.Linear(context_dim, embed_dim, bias= False)
+            self.value = nn.Linear(context_dim, hidden_dim, bias= False)
+
+    def forward(self, tokens, context= None):
         """Outputs Q, K, V
 
         Args:
@@ -49,12 +58,12 @@ class CrossAttention(nn.Module):
         Returns:
             (batch, seq_len_query, hidden_dim): attention scores
         """
-        if self.self_attn:
+        if self.self_attention:
             Q, K, V = self.query(tokens), self.key(tokens), self.value(tokens)
         else:
             Q, K, V = self.query(tokens), self.key(context), self.value(context)
         
         attention_scores = torch.einsum('bth,bsh->bts', Q, K)
-        attnmats = F.softmax(attention_scores, dim=-1) # dovrebbe essere -1, prima era 1
-        ctx_vecs = torch.einsum("bts,bsh->bth", attnmats, V)
-        return ctx_vecs
+        attention_mats = F.softmax(attention_scores, dim= -1) # dovrebbe essere -1, prima era 1
+        context_vector = torch.einsum("bts,bsh->bth", attention_mats, V)
+        return context_vector

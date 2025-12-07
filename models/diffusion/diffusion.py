@@ -53,7 +53,7 @@ class DiffusionModel(nn.Module):
         super().__init__()
         # continuos time embedding for diffusion 
         self.time_embed = nn.Sequential(
-            GaussianFourierProjection(embed_dim=embed_dim),
+            GaussianFourierProjection(embed_dim= embed_dim),
             nn.Linear(embed_dim, embed_dim)
         )# [batch, embed_dim]
 
@@ -67,43 +67,43 @@ class DiffusionModel(nn.Module):
         """------------------------
             ENCODING BLOCK
         ------------------------"""
-        self.conv1 = nn.Conv2d(1, channels[0], 3, stride=1, bias=False)
+        self.conv1 = nn.Conv2d(1, channels[0], 3, stride= 1, bias=False)
         self.dense1 = FullyConnected(embed_dim, channels[0])
-        self.norm1 = nn.GroupNorm(4, num_channels=channels[0])
+        self.gnorm1 = nn.GroupNorm(4, num_channels=channels[0])
 
-        self.conv2 = nn.Conv2d(channels[0], channels[1], 3, stride=2, bias=False)
+        self.conv2 = nn.Conv2d(channels[0], channels[1], 3, stride= 2, bias= False)
         self.dense2 = FullyConnected(embed_dim, channels[1])
-        self.norm2 = nn.GroupNorm(32, num_channels=channels[1])
+        self.gnorm2 = nn.GroupNorm(32, num_channels=channels[1])
 
-        self.conv3 = nn.Conv2d(channels[1], channels[2], 3, stride=2, bias=False)
+        self.conv3 = nn.Conv2d(channels[1], channels[2], 3, stride= 2, bias= False)
         self.dense3 = FullyConnected(embed_dim, channels[2])
-        self.norm3 = nn.GroupNorm(32, num_channels=channels[2])
+        self.gnorm3 = nn.GroupNorm(32, num_channels=channels[2])
         self.attn3 = SpatialTransformer(channels[2], text_dim)
 
-        self.conv4 = nn.Conv2d(channels[2], channels[3], 3, stride=2, bias=False)
+        self.conv4 = nn.Conv2d(channels[2], channels[3], 3, stride= 2, bias= False)
         self.dense4 = FullyConnected(embed_dim, channels[3])
-        self.norm4 = nn.GroupNorm(32, num_channels=channels[3])
+        self.gnorm4 = nn.GroupNorm(32, num_channels=channels[3])
         self.attn4 = SpatialTransformer(channels[3], text_dim)
 
         """---------------------
             DECODING BLOCK
         ----------------------"""
-        self.tconv4 = nn.ConvTranspose2d(channels[3], channels[2], 3, stride=2, bias=False)
+        self.tconv4 = nn.ConvTranspose2d(channels[3], channels[2], 3, stride= 2, bias= False)
         self.dense5 = FullyConnected(embed_dim, channels[2])
         self.tgnorm4 = nn.GroupNorm(32, num_channels=channels[2])
 
-        self.tconv3 = nn.ConvTranspose2d(channels[2], channels[1], 3, stride=2, bias=False, output_padding=1)
+        self.tconv3 = nn.ConvTranspose2d(channels[2], channels[1], 3, stride= 2, bias= False, output_padding= 1)
         self.dense6 = FullyConnected(embed_dim, channels[1])
         self.tgnorm3 = nn.GroupNorm(32, num_channels=channels[1])
 
-        self.tconv2 = nn.ConvTranspose2d(channels[1], channels[0], 3, stride=2, bias=False, output_padding=1)
+        self.tconv2 = nn.ConvTranspose2d(channels[1], channels[0], 3, stride= 2, bias= False, output_padding= 1)
         self.dense7 = FullyConnected(embed_dim, channels[0])
         self.tgnorm2 = nn.GroupNorm(32, num_channels=channels[0])
 
-        self.tconv1 = nn.ConvTranspose2d(channels[0], 1, 3, stride=1)
+        self.tconv1 = nn.ConvTranspose2d(channels[0], 1, 3, stride= 1)
 
 
-    def forward(self, img_batch, t, label_batch=None):
+    def forward(self, img_batch, t, label_batch= None):
         """
             Compute the forward pass of the U-Net Transformer.
 
@@ -132,27 +132,33 @@ class DiffusionModel(nn.Module):
                     Predicted noise ε_θ(img_batch_t, t, label_batch), shape (B, 1, H, W).
             
         """
-        # Embed time and text
+
+        """----------------------------
+            Time and label ENCODER
+        ----------------------------"""
         t_embed = self.gelu(self.time_embed(t))
         label_embed = self.cond_embed(label_batch).unsqueeze(1)
         
-        # Encoding
-        h1 = self.gelu(self.norm1(self.conv1(img_batch) + self.dense1(t_embed)))
-        h2 = self.gelu(self.norm2(self.conv2(h1) + self.dense2(t_embed)))
-        h3 = self.gelu(self.norm3(self.conv3(h2) + self.dense3(t_embed)))
-        h3 = self.attn3(h3, label_embed)
-        h4 = self.gelu(self.norm4(self.conv4(h3) + self.dense4(t_embed)))
-        h4 = self.attn4(h4, label_embed)
+        """----------------------------
+                ENCODER BLOCK
+        ----------------------------"""
+        l1 = self.gelu(self.gnorm1(self.conv1(img_batch) + self.dense1(t_embed)))
+        l2 = self.gelu(self.gnorm2(self.conv2(l1) + self.dense2(t_embed)))
+        l3 = self.gelu(self.gnorm3(self.conv3(l2) + self.dense3(t_embed)))
+        l3 = self.attn3(l3, label_embed)
+        l4 = self.gelu(self.gnorm4(self.conv4(l3) + self.dense4(t_embed)))
+        l4 = self.attn4(l4, label_embed)
 
-        # Decoding
-        h = self.gelu(self.tgnorm4(self.tconv4(h4) + self.dense5(t_embed)))
-        h = self.gelu(self.tgnorm3(self.tconv3(h + h3) + self.dense6(t_embed)))
-        h = self.gelu(self.tgnorm2(self.tconv2(h + h2) + self.dense7(t_embed)))
-        h = self.tconv1(h + h1)
+        """----------------------------
+                DECODER BLOCK
+        ----------------------------"""
+        d = self.gelu(self.tgnorm4(self.tconv4(l4) + self.dense5(t_embed)))
+        d = self.gelu(self.tgnorm3(self.tconv3(d + l3) + self.dense6(t_embed)))
+        d = self.gelu(self.tgnorm2(self.tconv2(d + l2) + self.dense7(t_embed)))
+        d = self.tconv1(d + l1)
 
         # Normalize predicted noise by marginal std at time t
-        h = h / self.marginal_prob_std(t)[:, None, None, None]
-        return h
+        return d / self.marginal_prob_std(t)[:, None, None, None]
 
     @torch.no_grad()
     def sampling_technique(self, **kwargs):
@@ -177,17 +183,17 @@ class DiffusionModel(nn.Module):
         self.eval()
         with torch.no_grad():
             # Inizializza con rumore gaussiano
-            t = torch.ones(batch_size, device=device)
-            x = torch.randn(batch_size, *x_shape, device=device) * self.marginal_prob_std(t)[:, None, None, None]
+            t = torch.ones(batch_size, device= device)
+            x = torch.randn(batch_size, *x_shape, device= device) * self.marginal_prob_std(t)[:, None, None, None]
 
             # Passi di tempo da 1 -> eps
-            time_steps = torch.linspace(1.0, eps, num_steps, device=device)
+            time_steps = torch.linspace(1.0, eps, num_steps, device= device)
             step_size = time_steps[0] - time_steps[1]
 
-            for time_step in tqdm(time_steps, desc="Sampling"):
-                batch_time_step = torch.ones(batch_size, device=device) * time_step
+            for time_step in tqdm(time_steps, desc= "Sampling"):
+                batch_time_step = torch.ones(batch_size, device= device) * time_step
                 g = diffusion_coeff(batch_time_step)  # funzione globale
-                eps_pred = self.forward(x, batch_time_step, y=y)
+                eps_pred = self.forward(img_batch= x, t= batch_time_step, label_batch= y)
                 mean_x = x + (g**2)[:, None, None, None] * eps_pred * step_size
                 x = mean_x + torch.sqrt(step_size) * g[:, None, None, None] * torch.randn_like(x)
 

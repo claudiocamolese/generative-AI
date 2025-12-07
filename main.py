@@ -6,13 +6,12 @@ import sys
 import os
 import yaml
 
-from torchvision import datasets, transforms
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader
 from train import Trainer
 from test import Tester
 from plotting import PlotModel
 
-
+from dataset import Dataset
 from models.diffusion.diffusion import DiffusionModel
 from models.diffusion.utils.probability import marginal_prob_std, diffusion_coeff
 from models.diffusion.utils.visualizer import Visualizer
@@ -45,44 +44,8 @@ def main(args):
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.5,), (0.5,))
-    ])
-
-    if config_file['dataset']['name'] == 'mnist':
-        full_train = datasets.MNIST(
-            root="./data",
-            train=True,
-            download=True,
-            transform=transform
-        )
-
-        test_dataset = datasets.MNIST(
-            root="./data",
-            train=False,
-            download=True,
-            transform=transform
-        )
-
-    elif config_file['dataset']['name'] == 'fashion':
-        full_train = datasets.FashionMNIST(
-            root="./data",
-            train=True,
-            download=True,
-            transform=transform
-        )
-        test_dataset = datasets.FashionMNIST(
-            root="./data",
-            train=False,
-            download=True,
-            transform=transform
-        )
-
-    train_size = int(0.8 * len(full_train))   # 48,000
-    val_size = len(full_train) - train_size   # 12,000
-
-    train_dataset, val_dataset = random_split(full_train, [train_size, val_size])
+    dataset = Dataset(dataset_name=config_file['dataset']['name'])
+    train_dataset, val_dataset, test_dataset = dataset.get_datasets()
 
     train_loader = DataLoader(train_dataset, batch_size= 64, shuffle=True)
     val_loader   = DataLoader(val_dataset, batch_size= 64, shuffle=False)

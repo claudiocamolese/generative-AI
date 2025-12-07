@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
+
 from einops import rearrange
 from .transformer import Transformer
 
@@ -24,7 +25,7 @@ class SpatialTransformer(nn.Module):
         super(SpatialTransformer, self).__init__()
         self.transformer = Transformer(hidden_dim, context_dim)
 
-    def forward(self, x, context=None):
+    def forward(self, x, context= None):
         """
             Forward pass of the Spatial Transformer.
 

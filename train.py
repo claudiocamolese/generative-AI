@@ -1,5 +1,4 @@
 import comet_ml
-from comet_ml import Experiment
 import torch
 
 from torch.optim import Adam

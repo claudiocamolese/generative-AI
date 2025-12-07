@@ -13,20 +13,23 @@ class Transformer(nn.Module):
                                If None, cross-attention can behave like self-attention.
 
         Components:
-            - self.attn_self: self-attention block applied to the tokens themselves.
-            - self.attn_cross: cross-attention block between tokens and external context.
+            - self.self_attention: self-attention block applied to the tokens themselves.
+            - self.cross_attention: cross-attention block between tokens and external context.
             - self.norm1, norm2, norm3: LayerNorms applied before each sub-layer.
-            - self.ffn: feed-forward network (MLP with 4x expansion and GELU activation).
+            - self.ffc: feed-forward network (MLP with 4x expansion and GELU activation).
         """
-        super(Transformer, self).__init__()
+        super().__init__()
+
         # self-attention of the tokens itselfs
-        self.attn_self = CrossAttention(hidden_dim, hidden_dim)
+        self.self_attention = CrossAttention(hidden_dim, hidden_dim)
         # cross-attention with context esterno
-        self.attn_cross = CrossAttention(hidden_dim, hidden_dim, context_dim)
+        self.cross_attention = CrossAttention(hidden_dim, hidden_dim, context_dim)
+
         self.norm1 = nn.LayerNorm(hidden_dim)
         self.norm2 = nn.LayerNorm(hidden_dim)
         self.norm3 = nn.LayerNorm(hidden_dim)
-        self.ffn = nn.Sequential(
+
+        self.ffc = nn.Sequential(
             nn.Linear(hidden_dim, 4*hidden_dim),
             nn.GELU(),
             nn.Linear(4*hidden_dim, hidden_dim),
@@ -48,8 +51,8 @@ class Transformer(nn.Module):
                             Each token contains combined information from self-attention,
                             cross-attention, and the feed-forward network.
         """
-        x = self.attn_self(self.norm1(x)) + x
-        x = self.attn_cross(self.norm2(x), context=context) + x
-        x = self.ffn(self.norm3(x)) + x
+        x = self.self_attention(self.norm1(x)) + x
+        x = self.cross_attention(self.norm2(x), context=context) + x
+        x = self.ffc(self.norm3(x)) + x
         return x
 
