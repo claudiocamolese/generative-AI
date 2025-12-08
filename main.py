@@ -1,14 +1,14 @@
 import comet_ml
 from comet_ml import Experiment
 import torch
-import argparse
-import sys
+
 import os
 import yaml
 
 from train import Trainer
 from test import Tester
 from utils.plotting import PlotModel
+from utils.parser import parse_args
 
 # ---------- Diffusion ---------------------
 from dataset import MyDataloader
@@ -17,34 +17,8 @@ from models.diffusion.utils.probability import marginal_prob_std, diffusion_coef
 from models.diffusion.utils.visualizer import Visualizer
 # ------------------------------------------
 
-def parse_args(args=sys.argv[1:]):
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--model", "-m", type=str, default=None,
-                        help="model to be trained",
-                        choices=["mog"])
-    parser.add_argument("--train", action="store_true",
-                        help="training mode")
-    parser.add_argument("--test", action="store_true",
-                        help="testing mode")
-    parser.add_argument("--track", action="store_true",
-                        help="Track the training of the model")
-    
-    group = parser.add_mutually_exclusive_group(required=True)
 
-    group.add_argument("--dm", action="store_true", help="Run diffusion model")
-    group.add_argument("--gan", action="store_true", help="Run GAN model")
-    group.add_argument("--fb", action="store_true", help="Run flow-based model")
-    group.add_argument("--vae", action="store_true", help="Run variational autoencoder model")
-
-    args = parser.parse_args(args)
-
-    if not (args.train or args.test):
-        parser.error("You must specify at least --train or --test")
-
-    return args
-
-
-def main(args):
+def main(args, dataset_name):
     
     with open('config.yaml', 'r') as file:
         config_file = yaml.safe_load(file) 
@@ -55,10 +29,14 @@ def main(args):
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    dataloader = MyDataloader(dataset_name=config_file['dataset']['name'])
+    dataloader = MyDataloader(dataset_name= dataset_name)
     train_loader, val_loader, test_loader = dataloader.get_dataloader()
 
-    os.makedirs(f"./models/diffusion/checkpoints/{config_file['dataset']['name']}/", exist_ok=True)
+    images, labels = next(iter(train_loader))
+    B, channels, high, width = images.shape
+
+
+    os.makedirs(f"./models/diffusion/checkpoints/{dataset_name}/", exist_ok=True)
 
     if args.train :
         trainer = Trainer(train_loader= train_loader,
@@ -66,7 +44,7 @@ def main(args):
                           device= device,
                           experiment= experiment if args.track else None,
                           track_flag = True if args.track else False,
-                          config =config_file)
+                          dataset_name = dataset_name)
 
         if args.gan:
             print("gan")
@@ -75,9 +53,15 @@ def main(args):
             epochs = config_file['train']['dm']['epochs']
             lr = float(config_file['train']['dm']['lr'])
 
-            model = DiffusionModel(marginal_prob_std= marginal_prob_std)
+            model = DiffusionModel(marginal_prob_std= marginal_prob_std, 
+                                   channels= [32, 64, 128, 256] if channels==1 else [128, 256, 512, 1024],
+                                   embed_dim= 256 if channels==1 else 512,
+                                   text_dim= 256 if channels==1 else 512,
+                                   in_channels= channels, 
+                                   img_size= high)
             
-            plotter = PlotModel(model= model, device = device)
+            
+            plotter = PlotModel(model= model, device = device, in_channel= channels, img_size= high)
             plotter.plot_model(input= plotter.input_diffusion(), path="./figures/diffusion/model/")
 
             trainer.train_diffusion_model(model= model, epochs= epochs, lr= lr)
@@ -92,9 +76,14 @@ def main(args):
             pass
 
         if args.dm:
-            path = f"./models/diffusion/checkpoints/{config_file['dataset']['name']}/final_model.pth"
+            path = f"./models/diffusion/checkpoints/{dataset_name}/final_model.pth"
             
-            diffusion_model = DiffusionModel(marginal_prob_std= marginal_prob_std)
+            diffusion_model = DiffusionModel(marginal_prob_std= marginal_prob_std, 
+                                   channels= [32, 64, 128, 256] if channels==1 else [128, 256, 512, 1024],
+                                   embed_dim= 256 if channels==1 else 512,
+                                   text_dim= 256 if channels==1 else 512,
+                                   in_channels= channels, 
+                                   img_size= high)
             model = tester.test_diffusion(model= diffusion_model, path= path)
 
             visualizer = Visualizer(
@@ -102,7 +91,7 @@ def main(args):
                 marginal_fn= diffusion_model.marginal_prob_std,
                 diffusion_coeff_fn= diffusion_coeff,
                 device= device,
-                config= config_file
+                dataset_name= dataset_name
             )
 
             visualizer.visualize_classes(diffusion_model, sample_batch_size= 16, num_steps= 250)
@@ -110,5 +99,5 @@ def main(args):
 
 
 if __name__ == "__main__":
-    args = parse_args()
-    main(args)
+    args, dataset_name = parse_args()
+    main(args, dataset_name)

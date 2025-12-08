@@ -18,7 +18,7 @@ class Visualizer:
         - figures/diffusion/steps/
     """
 
-    def __init__(self, sampler, marginal_fn, diffusion_coeff_fn, config, device="cuda" if torch.cuda.is_available() else 'cpu'):
+    def __init__(self, sampler, marginal_fn, diffusion_coeff_fn, dataset_name, device= "cuda" if torch.cuda.is_available() else 'cpu'):
         """
             Initialize the Visualizer.
 
@@ -33,15 +33,15 @@ class Visualizer:
         self.marginal_fn = marginal_fn
         self.diffusion_coeff_fn = diffusion_coeff_fn
         self.device = device
-        self.config = config
+        self.dataset_name = dataset_name
 
         # Create output folders
-        os.makedirs(f"./figures/diffusion/{self.config['dataset']['name']}/stable", exist_ok=True)
-        os.makedirs(f"./figures/diffusion/{self.config['dataset']['name']}/steps", exist_ok=True)
+        os.makedirs(f"./figures/diffusion/{self.dataset_name}/stable", exist_ok=True)
+        os.makedirs(f"./figures/diffusion/{self.dataset_name}/steps", exist_ok=True)
 
     # ----------------------------------------------------------------------
 
-    def visualize_classes(self, model, sample_batch_size=16, num_steps=250):
+    def visualize_classes(self, model, sample_batch_size=16, num_steps= 500):
         """
             Generate samples for digits 0-9 with a fixed number of sampling steps.
 
@@ -69,7 +69,7 @@ class Visualizer:
             )
 
             samples = samples.clamp(0.0, 1.0)
-            sample_grid = make_grid(samples, nrow=int(np.sqrt(sample_batch_size)))
+            sample_grid = make_grid(samples, nrow= int(np.sqrt(sample_batch_size)))
 
             plt.subplot(2, 5, i + 1)
             plt.title(f"Class: {digit}")
@@ -77,7 +77,7 @@ class Visualizer:
             plt.imshow(sample_grid.permute(1, 2, 0).cpu(), vmin= 0., vmax= 1.)
 
         plt.tight_layout()
-        path = f"./figures/diffusion/{self.config['dataset']['name']}/stable/classes_{num_steps}_steps.png"
+        path = f"./figures/diffusion/{self.dataset_name}/stable/classes_{num_steps}_steps.png"
         plt.savefig(path, dpi=300)
         plt.close()
 

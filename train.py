@@ -14,13 +14,13 @@ from utils.printing import printing_train
 
 
 class Trainer():
-    def __init__(self, train_loader, val_loader, device, track_flag, experiment, config) -> None:
+    def __init__(self, train_loader, val_loader, device, track_flag, experiment, dataset_name) -> None:
         self.device = device
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.track_flag = track_flag
         self.experiment = experiment 
-        self.config = config
+        self.dataset_name = dataset_name
         
     
     def train_diffusion_model(self, model, epochs, lr):
@@ -86,12 +86,12 @@ class Trainer():
                 self.experiment.log_metric("learning_rate", lr_current, step=epoch)
 
             if epoch_loss < last_loss:
-                torch.save(self.model.state_dict(), f"./models/diffusion/checkpoints/{self.config['dataset']['name']}/final_model.pth")
+                torch.save(self.model.state_dict(), f"./models/diffusion/checkpoints/{self.dataset_name}/final_model.pth")
                 last_loss = epoch_loss
-                print(f"New model saved in models/diffusion/checkpoints/{self.config['dataset']['name']}/ !")
+                print(f"New model saved in models/diffusion/checkpoints/{self.dataset_name}/ !")
 
             if self.track_flag:    
-                self.experiment.log_asset(f"./models/diffusion/checkpoints/{self.config['dataset']['name']}/final_model.pth")
+                self.experiment.log_asset(f"./models/diffusion/checkpoints/{self.dataset_name}/final_model.pth")
 
     def train_gan_model(self):
         pass
