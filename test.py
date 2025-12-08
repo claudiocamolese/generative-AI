@@ -3,9 +3,9 @@ import torch.nn as nn
 import torch
 
 from models.diffusion.utils.probability import marginal_prob_std
-from models.diffusion.utils.loss import loss_diffusion
 from tqdm import tqdm
-from printing import printing_test
+from utils.printing import printing_test
+from loss import Loss
 
 class Tester():
     def __init__(self, test_loader, device, track_flag, experiment):
@@ -17,6 +17,7 @@ class Tester():
     def test_diffusion(self, model, path):
         self.model = model.to(self.device)
         model_name = 'Diffusion_model'
+        self.loss = Loss(model= self.model)
         
         self.model.load_state_dict(torch.load(path, weights_only=True, map_location= self.device))
         self.model.eval()
@@ -30,7 +31,7 @@ class Tester():
             self.img_batch = img_batch.to(self.device)
             self.label_batch = label_batch.to(self.device)
 
-            loss = loss_diffusion(model= self.model, img_batch= self.img_batch, label_batch= self.label_batch, marginal_prob_std= marginal_prob_std)
+            loss = self.loss.loss_diffusion(img_batch= self.img_batch, label_batch= self.label_batch, marginal_prob_std= marginal_prob_std)
 
             batch_bar.set_description(f"Test Loss: {loss.item():.4f}")
 

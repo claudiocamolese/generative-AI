@@ -8,12 +8,14 @@ import yaml
 
 from train import Trainer
 from test import Tester
-from plotting import PlotModel
+from utils.plotting import PlotModel
 
+# ---------- Diffusion ---------------------
 from dataset import MyDataloader
 from models.diffusion.diffusion import DiffusionModel
 from models.diffusion.utils.probability import marginal_prob_std, diffusion_coeff
 from models.diffusion.utils.visualizer import Visualizer
+# ------------------------------------------
 
 def parse_args(args=sys.argv[1:]):
     parser = argparse.ArgumentParser()
@@ -56,7 +58,7 @@ def main(args):
     dataloader = MyDataloader(dataset_name=config_file['dataset']['name'])
     train_loader, val_loader, test_loader = dataloader.get_dataloader()
 
-    os.makedirs(f"models/diffusion/checkpoints/{config_file['dataset']['name']}/", exist_ok=True)
+    os.makedirs(f"./models/diffusion/checkpoints/{config_file['dataset']['name']}/", exist_ok=True)
 
     if args.train :
         trainer = Trainer(train_loader= train_loader,

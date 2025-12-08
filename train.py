@@ -4,12 +4,12 @@ import torch
 from torch.optim import Adam
 from torch.optim.lr_scheduler import StepLR, CosineAnnealingLR
 from tqdm import tqdm
+from loss import Loss
 
 # --------- Diffusion -------------
 from models.diffusion.utils.probability import diffusion_coeff, marginal_prob_std
-from printing import printing_model
-from models.diffusion.utils.loss import loss_diffusion
-from printing import printing_train
+from utils.printing import printing_model
+from utils.printing import printing_train
 # ---------------------------------
 
 
@@ -21,6 +21,7 @@ class Trainer():
         self.track_flag = track_flag
         self.experiment = experiment 
         self.config = config
+        
     
     def train_diffusion_model(self, model, epochs, lr):
         self.model = model
@@ -28,6 +29,8 @@ class Trainer():
         self.lr = lr
         self.model_name = "Diffusion_model"
         last_loss= float('inf')
+
+        self.loss = Loss(model= self.model)        
 
         printing_train(self.model_name)
 
@@ -58,7 +61,7 @@ class Trainer():
                 #     loss = loss_fn_cond_ldm(self.model, img_batch, label_batch, marginal_prob_std_fn)
                 # else:
                 marginal_fn = lambda t_: marginal_prob_std(t_, device=self.device)  
-                loss = loss_diffusion(model= self.model, img_batch= img_batch, label_batch= label_batch, marginal_prob_std= marginal_fn, device= self.device)
+                loss = self.loss.loss_diffusion(img_batch= img_batch, label_batch= label_batch, marginal_prob_std= marginal_fn, device= self.device)
                 
                 optimizer.zero_grad()
                 loss.backward()

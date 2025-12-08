@@ -5,13 +5,13 @@ The model is a **Conditional Denoising Diffusion Probabilistic Model (DDPM)** bu
 
 ## Diffusion from scratch
 <p float="left">
-  <img src="../../figures/diffusion/mnist/steps/digit4_steps.png" width="45%" />
-  <img src="../../figures/diffusion/fashion/steps/digit4_steps.png" width="45%" /> 
-</p>
+  <img src="../../figures/diffusion/fashion/steps/class_4_steps.png" width="45%" />
+  <img src="../../figures/diffusion/mnist/steps/class_4_steps.png" width="45%" /> 
+</p>figures/diffusion/fashion/stable/classes_250_steps.png
 
 <p float="left">
-  <img src="../../figures/diffusion/mnist/stable/classes_250steps.png" width="45%" />
-  <img src="../../figures/diffusion/fashion/stable/classes_250steps.png" width="45%" /> 
+  <img src="../../figures/diffusion/mnist/stable/classes_250_steps.png" width="45%" /> 
+  <img src="../../figures/diffusion/fashion/stable/classes_250_steps.png" width="45%" />
 </p>
 
 ---
