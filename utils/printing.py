@@ -10,7 +10,7 @@ def printing_model(model, model_name):
     print("-------------------------------------------")
 
 def printing_train(model_name):
-    print(f"\n--------------------------------------------------\nStarted testing of {model_name}\n--------------------------------------------------")
+    print(f"\n--------------------------------------------------\nStarted training of {model_name}\n--------------------------------------------------")
 
 def printing_test(model_name):
     print(f"\n--------------------------------------------------\n{model_name} correctly uploaded for eval\n--------------------------------------------------")

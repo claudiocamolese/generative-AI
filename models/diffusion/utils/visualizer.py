@@ -125,7 +125,7 @@ class Visualizer:
             plt.imshow(sample_grid.permute(1, 2, 0).cpu(), vmin= 0., vmax= 1.)
 
         plt.tight_layout()
-        path = f"./figures/diffusion/{self.config['dataset']['name']}/steps/class_{digit}_steps.png"
+        path = f"./figures/diffusion/{self.dataset_name}/steps/class_{digit}_steps.png"
         plt.savefig(path, dpi= 300)
         plt.close()
 

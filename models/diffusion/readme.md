@@ -7,7 +7,7 @@ The model is a **Conditional Denoising Diffusion Probabilistic Model (DDPM)** bu
 <p float="left">
   <img src="../../figures/diffusion/fashion/steps/class_4_steps.png" width="45%" />
   <img src="../../figures/diffusion/mnist/steps/class_4_steps.png" width="45%" /> 
-</p>figures/diffusion/fashion/stable/classes_250_steps.png
+</p>
 
 <p float="left">
   <img src="../../figures/diffusion/mnist/stable/classes_250_steps.png" width="45%" /> 
@@ -127,12 +127,13 @@ The model predicts the noise `-z` added to `x_0` to produce `x_t`:
 
 ## How to train
 ```bash
-https://github.com/claudiocamolese/generative-AI.git #clone repository
+git clone https://github.com/claudiocamolese/generative-AI.git #clone repository
 cd generative-AI
 ```
 ```python
 # in the command line run
-python main.py --train --test --dm <optional>--track# you can just use train/test flag
+# supported dataset: mnist, fashion, cifar10
+python main.py --train --test --dm --<dataset> <optional>--track 
 ```
 
 ### Model architecture image
