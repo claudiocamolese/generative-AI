@@ -21,6 +21,7 @@ class Trainer():
         self.track_flag = track_flag
         self.experiment = experiment 
         self.dataset_name = dataset_name
+        self.last_loss = float('inf')
         
     
     def train_diffusion_model(self, model, epochs, lr):
@@ -28,7 +29,6 @@ class Trainer():
         self.epochs = epochs
         self.lr = lr
         self.model_name = "Diffusion_model"
-        last_loss= float('inf')
 
         self.loss = Loss(model= self.model)        
 
@@ -85,9 +85,9 @@ class Trainer():
                 self.experiment.log_metric("epoch_loss", epoch_loss, step=epoch)
                 self.experiment.log_metric("learning_rate", lr_current, step=epoch)
 
-            if epoch_loss < last_loss:
+            if epoch_loss < self.last_loss:
                 torch.save(self.model.state_dict(), f"./models/diffusion/checkpoints/{self.dataset_name}/final_model.pth")
-                last_loss = epoch_loss
+                self.last_loss = epoch_loss
                 print(f"New model saved in models/diffusion/checkpoints/{self.dataset_name}/ !")
 
             if self.track_flag:    
@@ -99,5 +99,69 @@ class Trainer():
     def train_vae_model(self):
         pass
     
-    def train_flowbased_model(self):
-        pass
+    def train_flowbased_model(self, model, epochs, lr):
+        self.model = model
+        self.epochs = epochs
+        self.lr = lr
+        self.model_name = "Flow based model"
+
+
+        self.loss = Loss(model= self.model)        
+
+        printing_train(self.model_name)
+
+        if self.track_flag:
+            self.experiment.log_parameter("learning_rate", self.lr)
+            self.experiment.log_parameter("epochs", self.epochs)
+            self.experiment.log_parameter("model_name", self.model_name)
+
+
+        self.model.to(self.device)
+        self.model.train()
+        printing_model(model= self.model, model_name= self.model_name)
+
+        optimizer = Adam(self.model.parameters(), lr= self.lr)
+        #scheduler = StepLR(optimizer= optimizer, step_size=25)
+        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.1**(1/self.epochs))
+
+        for epoch in range(self.epochs):
+            avg_loss = 0.
+            num_items = 0
+
+            batch_bar = tqdm(self.train_loader, desc=f"Epoch {epoch+1} Loss: 0.000")
+
+            for step, (img_batch, label_batch) in enumerate(batch_bar):
+                img_batch = img_batch.to(self.device)
+                label_batch = label_batch.to(self.device)
+
+                loss = self.loss.loss_flow_match(img_batch, label_batch, device = 'cuda' if torch.cuda.is_available() else 'cpu')
+                
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
+                avg_loss += loss.item() * img_batch.shape[0]
+                num_items += img_batch.shape[0]
+                
+                batch_bar.set_description(f"Epoch {epoch + 1} Loss: {loss.item():.4f}")
+            
+                if self.track_flag and (step % 40 == 0):
+                    self.experiment.log_metric("batch_loss", loss.item(), step=epoch * len(self.train_loader) + step)
+                        
+            scheduler.step()
+            lr_current = scheduler.get_last_lr()[0]
+
+            epoch_loss = avg_loss / num_items
+            print('{} Average Loss: {:5f} lr {:.1e}'.format(epoch + 1, epoch_loss, lr_current))
+            
+            if self.track_flag:
+                self.experiment.log_metric("epoch_loss", epoch_loss, step=epoch)
+                self.experiment.log_metric("learning_rate", lr_current, step=epoch)
+
+            if epoch_loss < self.last_loss:
+                torch.save(self.model.state_dict(), f"./models/flow_based/checkpoints/{self.dataset_name}/final_model.pth")
+                self.last_loss = epoch_loss
+                print(f"New model saved in models/flow_based/checkpoints/{self.dataset_name}/ !")
+                
+            if self.track_flag:    
+                self.experiment.log_asset(f"./models/flow_based/checkpoints/{self.dataset_name}/final_model.pth")

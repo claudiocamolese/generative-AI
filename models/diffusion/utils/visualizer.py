@@ -5,7 +5,7 @@ from torchvision.utils import make_grid
 import numpy as np
 
 
-class Visualizer:
+class DiffVisualizer:
     """
         Utility class for visualizing the outputs of diffusion models.
 

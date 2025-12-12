@@ -11,7 +11,7 @@ def parse_args(args=sys.argv[1:]):
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--dm", action="store_true", help="Run diffusion model")
     group.add_argument("--gan", action="store_true", help="Run GAN model")
-    group.add_argument("--fb", action="store_true", help="Run flow-based model")
+    group.add_argument("--fm", action="store_true", help="Run flow-based model")
     group.add_argument("--vae", action="store_true", help="Run variational autoencoder model")
 
     dataset_group = parser.add_mutually_exclusive_group(required=True)

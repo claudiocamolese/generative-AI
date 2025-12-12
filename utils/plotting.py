@@ -33,6 +33,16 @@ class PlotModel():
         t   = torch.rand(batch_size, device=self.device)               
         labels = torch.randint(0, 10, (batch_size,), device=self.device)   
         return img, t, labels
+    
+    def input_flow_match(self):
+        """Create random inputs for FlowMatchingClassCond models."""
+        batch_size = 2
+
+        img = torch.randn(batch_size, self.in_channel, self.img_size, self.img_size, device=self.device)
+        labels = torch.randint(0, 10, (batch_size,), device=self.device)
+
+        return (img, labels)
+
 
     def plot_model(self, input, path):
         """Plot and save the model's computational graph.
@@ -41,7 +51,7 @@ class PlotModel():
             input (tuple): Tuple containing model inputs.
             path (str): Directory where the graph will be saved.
         """
-        # Esegue il forward pass dummy (*input spacchetta la tupla img, t, labels)
+
         y = self.model(*input)
         
         # Genera il grafico

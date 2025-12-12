@@ -47,3 +47,13 @@ class Loss(nn.Module):
         
         return loss
     
+    def loss_flow_match(self,img_batch, label_batch, device = 'cuda' if torch.cuda.is_available() else 'cpu'):
+        
+        self.img_batch = img_batch
+        self.label_batch = label_batch
+
+        output, target = self.model(img_batch, label_batch)
+        loss = F.mse_loss(target, output, reduction='mean')
+        return loss
+
+    
