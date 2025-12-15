@@ -1,8 +1,23 @@
 comet :
   project_name : "generative AI"
-  api_key : ""
+  api_key : "udiGvywgHQaHC30AylI8hOeyI"
 
 train:
     dm :
         lr: 1e-3
-        epochs : 150
+        epochs : 400
+
+train:
+  gan:
+    epochs: 200
+    g_lr: 5e-5
+    d_lr: 5e-5
+    n_critic: 9
+    gp_lambda: 5.0
+
+model:
+  gan:
+    latent_size: 100
+    generator_size: 256
+    discriminator_size: 256
+    hidden_size: 1024

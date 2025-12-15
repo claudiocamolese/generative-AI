@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch import autograd
 
 
 class Loss(nn.Module):
@@ -47,3 +48,32 @@ class Loss(nn.Module):
         
         return loss
     
+    def generator_loss(self, fake_output):
+        # G_loss = -E[D(G(z))] (Objective: max(E[D(G(z))]))
+        return -fake_output.mean()
+
+    def discriminator_loss(self, real_images, fake_image, real_output, fake_output, real_class_labels, gp_lambda, batch_size, device):
+        d_loss_real = real_output.mean()
+        d_loss_fake = fake_output.mean()
+        
+        alpha = torch.rand((batch_size, 1), device=device)
+        alpha = alpha.view(-1, 1, 1, 1)
+        
+        interpolates = (alpha * real_images + (1. - alpha) * fake_image).requires_grad_(True)
+        
+        d_interpolates = self.model(interpolates, real_class_labels)
+        
+        grad_tensor = torch.ones(d_interpolates.size(), device=device)
+        
+        # Compute gradients of D(x_hat) w.r.t. x_hat
+        gradients = autograd.grad(
+            outputs=d_interpolates, 
+            inputs=interpolates, 
+            grad_outputs=grad_tensor, 
+            create_graph=True, 
+            only_inputs=True
+        )[0]
+        gradient_penalty = gp_lambda * ((gradients.view(batch_size, -1).norm(dim=1) - 1.) ** 2).mean()
+        
+        # D_loss = E[D(G(z))] - E[D(x)] + GP (WGAN objective: max(E[D(x)] - E[D(G(z))]))
+        return d_loss_fake - d_loss_real + gradient_penalty
